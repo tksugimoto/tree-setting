@@ -29,7 +29,8 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 		var key = prefix + object.key;
 		var name = object.name;
 		var type = object.type || "boolean";
-		var input_and_label = settingElement(key, name, type);
+		var value = self.get(key);
+		var input_and_label = settingElement(key, value, name, type);
 		var list = createElement("li", {
 			
 		}, input_and_label, function (){
@@ -37,13 +38,12 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 		});
 		if (object.child) {
 			var childElement = self.createSettingElement(object.child, key + ".");
-			list.appendChild(childElement);
+			list.appendChild(childElement).style.display = value ? "" : "none";
 		}
 	});
 	return container;
 	
-	function settingElement(key, name, type){
-		var value = self.get(key);
+	function settingElement(key, value, name, type){
 		var separator = " : ";
 		if (type === "boolean") {
 			var id = _idPrefix + key;
@@ -53,8 +53,17 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 					checked: value,
 					id: id,
 					onchange: function (){
+						var checked  = this.checked;
 						// 入力ごとに保存すると重いかも
-						self.set(key, this.checked);
+						self.set(key, checked);
+						// 本当はdisabledにして表示はされているけど編集できない状態にしたい
+						var children = this.parentNode.children;
+						for (var i = 0, len = children.length; i < len; i++) {
+							if (children[i].tagName === "UL") {
+								children[i].style.display = checked ? "" : "none";
+								break;
+							}
+						}
 					}
 				}),
 				separator, 
