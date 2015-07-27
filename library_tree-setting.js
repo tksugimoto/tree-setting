@@ -69,7 +69,10 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 				separator, 
 				createElement("label", {
 					innerText: name,
-					htmlFor: id
+					htmlFor: id,
+					style: {
+						cursor: "pointer"
+					}
 				})
 			];
 		} else {
