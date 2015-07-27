@@ -107,6 +107,15 @@ TreeSetting.prototype.createSettingInfo = function (tree, prefix){
 		}
 	});
 };
+TreeSetting.prototype.getAllSettings = function (){
+	var settingData = {};
+	var self = this;
+	Object.keys(this.settingInfo).forEach(function(key){
+		settingData[key] = self.get(key);
+	});
+	return settingData;
+};
+
 TreeSetting.prototype.load = function (){
 	this.settingData = JSON.parse(localStorage[this.localStorageKey] || "{}");
 };
