@@ -21,7 +21,7 @@ var treeSetting = new TreeSetting([{
 		}, {
 			key: "dummy",
 			name: "dummy",
-			type: "string",
+			type: "text",
 			defaultValue: "テキスト設定も可能"
 		}]
 	}]
@@ -39,13 +39,21 @@ var treeSetting = new TreeSetting([{
 		child: [{
 			key: "host",
 			name: "IMAPサーバーのホスト",
-			type: "string",
+			type: "text",
 			defaultValue: "imap.gmail.com"
 		}, {
 			key: "port",
 			name: "IMAPサーバーのポート",
 			type: "number",
 			defaultValue: 993
+		}, {
+			key: "email",
+			name: "メールアドレス",
+			type: "text"
+		}, {
+			key: "password",
+			name: "パスワード",
+			type: "password"
 		}]
 	}]
 }]);

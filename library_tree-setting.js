@@ -4,7 +4,8 @@ function TreeSetting (settingTree, localStorageKey) {
 	// settingTreeにdefaultValue指定の無い設定があった場合のデフォルト値
 	this.defaultValue = {
 		boolean: false,
-		string: "",
+		text: "",
+		password: "",
 		number: 0,
 		radio: null
 	};
@@ -155,7 +156,7 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 		} else {
 			return [
 				createElement("input", {
-					type: "text",
+					type: type,
 					value: value,
 					title: "Enterで保存",
 					onkeyup: function (evt){
