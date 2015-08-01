@@ -135,7 +135,6 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 					title: "Enterで保存",
 					onkeyup: function (evt){
 						// 数字のみ：Enter押下時のみ保存
-						console.log(evt)
 						if (evt.keyCode === 13) {
 							var value = parseFloat(this.value);
 							if (isNaN(value)) value = undefined;
