@@ -128,23 +128,18 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 				})
 			];
 		} else if (type === "number") {
-			// TODO: 数字(type === "number"時)のバリデーション
 			return [
 				createElement("input", {
-					type: "text",
+					type: "number",
 					value: value,
 					title: "Enterで保存",
 					onkeyup: function (evt){
-						// Enter押下時のみ保存
+						// 数字のみ：Enter押下時のみ保存
+						console.log(evt)
 						if (evt.keyCode === 13) {
-							var value = parseFloat(this.value.replace(/[^0-9.]+/g, ""));
-							if (isNaN(value)) {
-								this.value = "数字を入れてください";
-								this.select();
-							} else {
-								this.value = value;
-								self.set(key, value);
-							}
+							var value = parseFloat(this.value);
+							if (isNaN(value)) value = undefined;
+							self.set(key, value);
 						}
 					}
 				}),
