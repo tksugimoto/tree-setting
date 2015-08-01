@@ -25,6 +25,29 @@ var treeSetting = new TreeSetting([{
 			defaultValue: "テキスト設定も可能"
 		}]
 	}]
+}, {
+	key: "target",
+	name: "対象メールサービス",
+	type: "radio",
+	defaultValue: "gmail",
+	radio: [{
+		value: "gmail",
+		name: "Gmail"
+	}, {
+		value: "other",
+		name: "その他",
+		child: [{
+			key: "host",
+			name: "IMAPサーバーのホスト",
+			type: "string",
+			defaultValue: "imap.gmail.com"
+		}, {
+			key: "port",
+			name: "IMAPサーバーのポート",
+			type: "number",
+			defaultValue: 993
+		}]
+	}]
 }]);
 
 var containerElement = document.getElementById("setting-container");
@@ -40,5 +63,8 @@ treeSetting.appendSettingElement(containerElement);
 	"function-B.wheel-seek",
 	"function-B.wheel-seek.adjustment-amount",
 	"function-B.wheel-seek.dummy",
-	"function-B.notthing.notthing"
+	"function-B.notthing.notthing",
+	"target",
+	"target=other.host",
+	"target = other .port"
 ]);

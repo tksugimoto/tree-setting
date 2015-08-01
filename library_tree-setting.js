@@ -5,7 +5,8 @@ function TreeSetting (settingTree, localStorageKey) {
 	this.defaultValue = {
 		boolean: false,
 		string: "",
-		number: 0
+		number: 0,
+		radio: null
 	};
 	
 	this.localStorageKey = localStorageKey || "tree-setting";
@@ -15,6 +16,8 @@ function TreeSetting (settingTree, localStorageKey) {
 	this.createSettingInfo(settingTree, "");
 }
 
+TreeSetting.idPrefix = "ts-";
+
 TreeSetting.prototype.createSettingElement = function (tree, prefix){
 	if (!tree) tree = this.settingTree;
 	if (!prefix) prefix = "";
@@ -22,51 +25,70 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 	var createElement = TreeSetting.createElement;
 	var container = createElement("ul");
 	if (prefix) {
-		container.style.marginLeft = "20px";
+		container.className = "ts-child";
 	}
-	var _idPrefix = "ts-";
 	tree.forEach(function (object){
-		var key = prefix + object.key;
+		var isRadioChild = prefix.slice(-1) === "=";
 		var name = object.name;
 		var type = object.type || "boolean";
-		var value = self.get(key);
-		var input_and_label = settingElement(key, value, name, type);
-		var list = createElement("li", {
-			
-		}, input_and_label, function (){
-			container.appendChild(this);
-		});
-		if (object.child) {
-			var childElement = self.createSettingElement(object.child, key + ".");
-			list.appendChild(childElement).style.display = value ? "" : "none";
+		if (type === "radio") {
+			var list = createElement("li", {
+				
+			}, name, function (){
+				container.appendChild(this);
+			});
+			if (object.radio) {
+				var nextPrefix = prefix + object.key + "=";
+				var childElement = self.createSettingElement(object.radio, nextPrefix);
+				list.appendChild(childElement);
+			}
+		} else {
+			if (isRadioChild) {
+				type = "radio";
+				var key = prefix.slice(0, -1);
+				var value = object.value;
+				var checked = self.get(key) === value;
+			} else {
+				var key = prefix + object.key;
+				var value = self.get(key);
+				var checked = type === "boolean" ? value : null;
+			}
+			var input_and_label = settingElement(key, value, name, type, checked);
+			var list = createElement("li", {
+				
+			}, input_and_label, function (){
+				container.appendChild(this);
+			});
+			if (object.child) {
+				var nextPrefix = (isRadioChild ? prefix + value : key) + ".";
+				var childElement = self.createSettingElement(object.child, nextPrefix);
+				childElement.setAttribute("data-ts-key", key);
+				if (isRadioChild) childElement.setAttribute("data-ts-radio-value", value);
+				list.appendChild(childElement).style.display = checked ? "" : "none";
+			}
 		}
 	});
 	return container;
 	
-	function settingElement(key, value, name, type){
+	function settingElement(key, value, name, type, checked){
 		var separator = " : ";
 		if (type === "boolean") {
-			var id = _idPrefix + key;
+			var id = TreeSetting.idPrefix + key;
 			return [
 				createElement("input", {
 					type: "checkbox",
-					checked: value,
+					checked: checked,
 					id: id,
 					onchange: function (){
 						var checked  = this.checked;
-						// 入力ごとに保存すると重いかも
+						// 変更ごとに保存すると重いかも
 						self.set(key, checked);
 						// 本当はdisabledにして表示はされているけど編集できない状態にしたい
-						var children = this.parentNode.children;
-						for (var i = 0, len = children.length; i < len; i++) {
-							if (children[i].tagName === "UL") {
-								children[i].style.display = checked ? "" : "none";
-								break;
-							}
-						}
+						var elem = document.querySelector('ul[data-ts-key="' + key + '"]');
+						if (elem) elem.style.display = checked ? "" : "none";
 					}
 				}),
-				separator, 
+				separator,
 				createElement("label", {
 					innerText: name,
 					htmlFor: id,
@@ -75,18 +97,73 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 					}
 				})
 			];
-		} else {
+		} else if (type === "radio") {
+			var id = TreeSetting.idPrefix + key + "=" + value;
+			return [
+				createElement("input", {
+					type: "radio",
+					checked: checked,
+					value: value,
+					id: id,
+					name: key,
+					onchange: function (){
+						self.set(key, value);
+						// 本当はdisabledにして表示はされているけど編集できない状態にしたい
+						var elems = document.querySelectorAll('ul[data-ts-key="' + key + '"]');
+						for (var i= 0, len = elems.length; i < len; i++) {
+							var elem = elems[i];
+							var checked = elem.getAttribute("data-ts-radio-value") === value;
+							elem.style.display = checked ? "" : "none";
+						}
+					}
+				}),
+				separator,
+				createElement("label", {
+					innerText: name,
+					htmlFor: id,
+					style: {
+						cursor: "pointer"
+					}
+				})
+			];
+		} else if (type === "number") {
 			// TODO: 数字(type === "number"時)のバリデーション
 			return [
 				createElement("input", {
 					type: "text",
 					value: value,
-					onkeyup: function (){
-						// 入力ごとに保存すると重いかも
-						self.set(key, this.value);
+					title: "Enterで保存",
+					onkeyup: function (evt){
+						// Enter押下時のみ保存
+						if (evt.keyCode === 13) {
+							var value = parseFloat(this.value.replace(/[^0-9.]+/g, ""));
+							if (isNaN(value)) {
+								this.value = "数字を入れてください";
+								this.select();
+							} else {
+								this.value = value;
+								self.set(key, value);
+							}
+						}
 					}
 				}),
-				separator, 
+				separator,
+				createElement("label", {
+					innerText: name
+				})
+			];
+		} else {
+			return [
+				createElement("input", {
+					type: "text",
+					value: value,
+					title: "Enterで保存",
+					onkeyup: function (evt){
+						// Enter押下時のみ保存
+						if (evt.keyCode === 13) self.set(key, this.value);
+					}
+				}),
+				separator,
 				createElement("label", {
 					innerText: name
 				})
@@ -105,6 +182,14 @@ TreeSetting.prototype.createSettingInfo = function (tree, prefix){
 		if (object.child) {
 			self.createSettingInfo(object.child, prefix + object.key + ".");
 		}
+		if (object.radio) {
+			object.radio.forEach(function (radio){
+				if (radio.child) {
+					var key = object.key + "=" + radio.value;
+					self.createSettingInfo(radio.child, prefix + key + ".");
+				}
+			});
+		}
 	});
 };
 TreeSetting.prototype.getAllSettings = function (){
@@ -122,13 +207,20 @@ TreeSetting.prototype.load = function (){
 TreeSetting.prototype.save = function (){
 	localStorage[this.localStorageKey] = JSON.stringify(this.settingData);
 };
-TreeSetting.prototype.get = function (name){
-	var value = this.settingData[name];
+TreeSetting.prototype.get = function (key){
+	key = key.replace(/ /g, "");
+	if (key.match(/^(.*)=([^.]+)$/)) {
+		// ラジオボタン設定の場合
+		key = RegExp.$1;
+		var value = RegExp.$2;
+		return this.get(key) === value;
+	}
+	var value = this.settingData[key];
 	if (typeof value !== "undefined") {
 		return value;
 	} else {
 		// setting情報のobjectから
-		var info = this.settingInfo[name] || {};
+		var info = this.settingInfo[key] || {};
 		if (typeof info.defaultValue !== "undefined") {
 			return info.defaultValue;
 		} else {
@@ -136,9 +228,9 @@ TreeSetting.prototype.get = function (name){
 		}
 	}
 };
-TreeSetting.prototype.set = function (name, value){
-	if (this.settingInfo.hasOwnProperty(name)) {
-		this.settingData[name] = value;
+TreeSetting.prototype.set = function (key, value){
+	if (this.settingInfo.hasOwnProperty(key)) {
+		this.settingData[key] = value;
 		this.save();
 		return true;
 	} else {
