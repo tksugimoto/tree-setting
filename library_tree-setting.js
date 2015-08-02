@@ -1,5 +1,5 @@
 ﻿
-function TreeSetting (settingTree, storageKey) {
+function TreeSetting (settingTree, option) {
 	this.settingTree = settingTree;
 	// settingTreeにdefaultValue指定の無い設定があった場合のデフォルト値
 	this.defaultValue = {
@@ -9,8 +9,9 @@ function TreeSetting (settingTree, storageKey) {
 		number: 0,
 		radio: null
 	};
-	
-	this.storageKey = storageKey || "tree-setting";
+	if (!option) option = {};
+	this.storageKey = option.storageKey || "tree-setting";
+	this.onElementDisplayChange = option.onElementDisplayChange || function (){};
 	
 	this.isChromeApp = !!(window.chrome && chrome.app && chrome.app.window);
 	this.enabledChromeStorage = !!(window.chrome && chrome.storage && chrome.storage.local);
@@ -94,6 +95,7 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 						for (var i= 0, len = elems.length; i < len; i++) {
 							elems[i].style.display = checked ? "" : "none";
 						}
+						self.onElementDisplayChange();
 					}
 				}),
 				separator,
@@ -123,6 +125,7 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 							var checked = elem.getAttribute("data-ts-radio-value") === value;
 							elem.style.display = checked ? "" : "none";
 						}
+						self.onElementDisplayChange();
 					}
 				}),
 				separator,
