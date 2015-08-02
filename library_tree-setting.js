@@ -12,8 +12,8 @@ function TreeSetting (settingTree, storageKey) {
 	
 	this.storageKey = storageKey || "tree-setting";
 	
-	this.isChromeApp = !!(window.chrome && chrome.app);
-	this.enabledChromeStorage = !!(window.chrome && chrome.storage);
+	this.isChromeApp = !!(window.chrome && chrome.app && chrome.app.window);
+	this.enabledChromeStorage = !!(window.chrome && chrome.storage && chrome.storage.local);
 	
 	this.loaded = false;
 	this.load();
