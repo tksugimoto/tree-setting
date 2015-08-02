@@ -90,8 +90,10 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 						// 変更ごとに保存すると重いかも
 						self.set(key, checked);
 						// 本当はdisabledにして表示はされているけど編集できない状態にしたい
-						var elem = document.querySelector('ul[data-ts-key="' + key + '"]');
-						if (elem) elem.style.display = checked ? "" : "none";
+						var elems = document.querySelectorAll('[data-ts-key="' + key + '"]');
+						for (var i= 0, len = elems.length; i < len; i++) {
+							elems[i].style.display = checked ? "" : "none";
+						}
 					}
 				}),
 				separator,
@@ -115,7 +117,7 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 					onchange: function (){
 						self.set(key, value);
 						// 本当はdisabledにして表示はされているけど編集できない状態にしたい
-						var elems = document.querySelectorAll('ul[data-ts-key="' + key + '"]');
+						var elems = document.querySelectorAll('[data-ts-key="' + key + '"]');
 						for (var i= 0, len = elems.length; i < len; i++) {
 							var elem = elems[i];
 							var checked = elem.getAttribute("data-ts-radio-value") === value;
