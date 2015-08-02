@@ -1,5 +1,5 @@
 ﻿
-function TreeSetting (settingTree, localStorageKey) {
+function TreeSetting (settingTree, storageKey) {
 	this.settingTree = settingTree;
 	// settingTreeにdefaultValue指定の無い設定があった場合のデフォルト値
 	this.defaultValue = {
@@ -10,7 +10,11 @@ function TreeSetting (settingTree, localStorageKey) {
 		radio: null
 	};
 	
-	this.localStorageKey = localStorageKey || "tree-setting";
+	this.storageKey = storageKey || "tree-setting";
+	
+	this.isChromeApp = !!(window.chrome && chrome.app);
+	this.enabledChromeStorage = !!(window.chrome && chrome.storage);
+	
 	this.load();
 	
 	this.settingInfo = {};
@@ -197,11 +201,33 @@ TreeSetting.prototype.getAllSettings = function (){
 };
 
 TreeSetting.prototype.load = function (){
-	this.settingData = JSON.parse(localStorage[this.localStorageKey] || "{}");
+	if (this.isChromeApp) {
+		if (this.enabledChromeStorage) {
+			var self = this;
+			chrome.storage.local.get(this.storageKey, function (data){
+				self.settingData = data[self.storageKey] || {};
+			});
+		} else {
+			throw "storage権限が必要";
+		}
+	} else {
+		this.settingData = JSON.parse(localStorage[this.storageKey] || "{}");
+	}
 };
 TreeSetting.prototype.save = function (){
-	localStorage[this.localStorageKey] = JSON.stringify(this.settingData);
+	if (this.isChromeApp) {
+		if (this.enabledChromeStorage) {
+			var data = {};
+			data[this.storageKey] = this.settingData;
+			chrome.storage.local.set(data);
+		} else {
+			throw "storage権限が必要";
+		}
+	} else {
+		localStorage[this.storageKey] = JSON.stringify(this.settingData);
+	}
 };
+
 TreeSetting.prototype.get = function (key){
 	key = key.replace(/ /g, "");
 	if (key.match(/^(.*)=([^.]+)$/)) {
