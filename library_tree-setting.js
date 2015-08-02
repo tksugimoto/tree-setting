@@ -15,6 +15,7 @@ function TreeSetting (settingTree, storageKey) {
 	this.isChromeApp = !!(window.chrome && chrome.app);
 	this.enabledChromeStorage = !!(window.chrome && chrome.storage);
 	
+	this.loaded = false;
 	this.load();
 	
 	this.settingInfo = {};
@@ -171,7 +172,9 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 	}
 };
 TreeSetting.prototype.appendSettingElement = function (parentNode){
-	parentNode.appendChild(this.createSettingElement());
+	this.ready(function (){
+		parentNode.appendChild(this.createSettingElement());
+	});
 };
 
 TreeSetting.prototype.createSettingInfo = function (tree, prefix){
@@ -206,12 +209,31 @@ TreeSetting.prototype.load = function (){
 			var self = this;
 			chrome.storage.local.get(this.storageKey, function (data){
 				self.settingData = data[self.storageKey] || {};
+				self.loaded = true;
+				self.runReadyQueue();
 			});
 		} else {
 			throw "storage権限が必要";
 		}
 	} else {
 		this.settingData = JSON.parse(localStorage[this.storageKey] || "{}");
+		this.loaded = true;
+		this.runReadyQueue();
+	}
+};
+TreeSetting.prototype.ready = function (fn){
+	if (this.loaded) {
+		fn.call(this);
+	} else {
+		this.readyQueue = this.readyQueue || [];
+		this.readyQueue.push(fn);
+	}
+};
+TreeSetting.prototype.runReadyQueue = function (){
+	if (this.readyQueue) {
+		this.readyQueue.forEach(function (fn){
+			fn.call(this);
+		}, this);
 	}
 };
 TreeSetting.prototype.save = function (){
