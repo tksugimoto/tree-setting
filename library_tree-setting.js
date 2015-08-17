@@ -86,6 +86,9 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 					type: "checkbox",
 					checked: checked,
 					id: id,
+					style: {
+						cursor: "pointer"
+					},
 					onchange: function (){
 						var checked  = this.checked;
 						// 変更ごとに保存すると重いかも
@@ -115,6 +118,9 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 					value: value,
 					id: id,
 					name: key,
+					style: {
+						cursor: "pointer"
+					},
 					onchange: function (){
 						self.set(key, value);
 						// 本当はdisabledにして表示はされているけど編集できない状態にしたい
