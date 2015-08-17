@@ -98,9 +98,8 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 						self.onElementDisplayChange();
 					}
 				}),
-				separator,
 				createElement("label", {
-					innerText: name,
+					innerText: separator + name,
 					htmlFor: id,
 					style: {
 						cursor: "pointer"
@@ -128,9 +127,8 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 						self.onElementDisplayChange();
 					}
 				}),
-				separator,
 				createElement("label", {
-					innerText: name,
+					innerText: separator + name,
 					htmlFor: id,
 					style: {
 						cursor: "pointer"
@@ -152,9 +150,8 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 						}
 					}
 				}),
-				separator,
 				createElement("label", {
-					innerText: name
+					innerText: separator + name
 				})
 			];
 		} else {
@@ -168,9 +165,8 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 						if (evt.keyCode === 13) self.set(key, this.value);
 					}
 				}),
-				separator,
 				createElement("label", {
-					innerText: name
+					innerText: separator + name
 				})
 			];
 		}
