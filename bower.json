@@ -1,0 +1,9 @@
+{
+	"name": "Tree-Setting",
+	"version": "1.0.0",
+	"main": "library_tree-setting.js",
+	"ignore": [
+		"readme.md",
+		"demo/"
+	]
+}
