@@ -25,9 +25,10 @@ function TreeSetting (settingTree, option) {
 
 TreeSetting.idPrefix = "ts-";
 
-TreeSetting.prototype.createSettingElement = function (tree, prefix){
+TreeSetting.prototype.createSettingElement = function (tree, prefix, document){
 	if (!tree) tree = this.settingTree;
 	if (!prefix) prefix = "";
+	if (!document) document = window.document;
 	var self = this;
 	var createElement = TreeSetting.createElement;
 	var container = createElement("ul");
@@ -46,7 +47,7 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 			});
 			if (object.radio) {
 				var nextPrefix = prefix + object.key + "=";
-				var childElement = self.createSettingElement(object.radio, nextPrefix);
+				var childElement = self.createSettingElement(object.radio, nextPrefix, document);
 				list.appendChild(childElement);
 			}
 		} else {
@@ -68,7 +69,7 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 			});
 			if (object.child) {
 				var nextPrefix = (isRadioChild ? prefix + value : key) + ".";
-				var childElement = self.createSettingElement(object.child, nextPrefix);
+				var childElement = self.createSettingElement(object.child, nextPrefix, document);
 				childElement.setAttribute("data-ts-key", key);
 				if (isRadioChild) childElement.setAttribute("data-ts-radio-value", value);
 				list.appendChild(childElement).style.display = checked ? "" : "none";
@@ -178,9 +179,9 @@ TreeSetting.prototype.createSettingElement = function (tree, prefix){
 		}
 	}
 };
-TreeSetting.prototype.appendSettingElement = function (parentNode){
+TreeSetting.prototype.appendSettingElement = function (parentNode, document){
 	this.ready(function (){
-		parentNode.appendChild(this.createSettingElement());
+		parentNode.appendChild(this.createSettingElement(null, null, document));
 	});
 };
 
